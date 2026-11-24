@@ -1,7 +1,7 @@
 {
-  "name": "SmallfontModule-Editor",
+  "name": "xelOutOfSync-Editor",
   "references": [
-    "SmallfontModule"
+    "xelOutOfSync"
   ],
   "includePlatforms": [
     "Editor"

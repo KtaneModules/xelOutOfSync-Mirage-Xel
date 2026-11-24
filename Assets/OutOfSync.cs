@@ -84,15 +84,12 @@ public class OutOfSync : MonoBehaviour
     };
     float[] _speeds = new float[9];
     int[] _queuePositions = new int[9];
-    int[][] _animation = new int[9][] { new int[7], new int[7], new int[7], new int[7], new int[7], new int[7], new int[7], new int[7], new int[7] };
+    int[][] _animation = new int[9][] { new int[5], new int[5], new int[5], new int[5], new int[5], new int[5], new int[5], new int[5], new int[5] };
     private static readonly Color32[] _colors = new Color32[]
     {
         new Color32(255, 255, 255, 255),
         new Color32(30, 30, 30, 255)
     };
-
-    private static readonly int[] _originalShift = new int[] { 0, 5, 10, 15, 20, 1, 6, 11, 16, 21, 2, 7, 12, 17, 22, 3, 8, 13, 18, 23, 4, 9, 14, 19, 24 };
-
     private string _word;
     private int _solutionPos;
     private const int _wordsPerBox = 60;
@@ -116,8 +113,8 @@ public class OutOfSync : MonoBehaviour
         _solutionPos = Array.IndexOf(_wordList, _word) / _wordsPerBox;
         for (int i = 0; i < SquareObjs.Length; i++)
         { 
-            _speeds[i] = Rnd.Range(0.3f, 2f);
-            _queuePositions[i] = Rnd.Range(0, 6);
+            _speeds[i] = Rnd.Range(0.4f, 1.2f);
+            _queuePositions[i] = Rnd.Range(0, 4);
             for (int j = 0; j < 5; j++)  _animation[i][j] = _key[_word[j] - 'A'][i];            
         }
         for (int i = 0; i < SquareObjs.Length; i++) { StartCoroutine(Animate(i)); }
@@ -178,11 +175,11 @@ public class OutOfSync : MonoBehaviour
         var elapsed = 0f;
         while (elapsed < duration)
         {
-            StatusLightObj.transform.localPosition = new Vector3(((i % 5) - 2) * 0.03f, Easing.InOutQuad(elapsed, -0.05f, 0.04f, duration), ((i / 5) - 2) * -0.03f);
+            StatusLightObj.transform.localPosition = new Vector3(((i % 3) - 1) * 0.05f, Easing.InOutQuad(elapsed, -0.05f, 0.04f, duration), ((i / 3) - 1) * -0.05f);
             yield return null;
             elapsed += Time.deltaTime;
         }
-        StatusLightObj.transform.localPosition = new Vector3(((i % 5) - 2) * 0.03f, 0.04f, ((i / 5) - 2) * -0.03f);
+        StatusLightObj.transform.localPosition = new Vector3(((i % 3) - 1) * 0.05f, 0.04f, ((i / 3) - 1) * -0.05f);
         elapsed = 0f;
         float waitTime;
         float yPos;
@@ -205,11 +202,11 @@ public class OutOfSync : MonoBehaviour
         yield return new WaitForSeconds(waitTime);
         while (elapsed < duration)
         {
-            StatusLightObj.transform.localPosition = new Vector3(((i % 5) - 2) * 0.03f, Easing.InOutQuad(elapsed, 0.04f, yPos, duration), ((i / 5) - 2) * -0.03f);
+            StatusLightObj.transform.localPosition = new Vector3(((i % 3) - 1) * 0.05f, Easing.InOutQuad(elapsed, 0.04f, yPos, duration), ((i / 3) - 1) * -0.05f);
             yield return null;
             elapsed += Time.deltaTime;
         }
-        StatusLightObj.transform.localPosition = new Vector3(((i % 5) - 2) * 0.03f, yPos, ((i / 5) - 2) * -0.03f);
+        StatusLightObj.transform.localPosition = new Vector3(((i % 3) - 1) * 0.05f, yPos, ((i / 3) - 1) * -0.05f);
         _isAnimating = false;
     }
     private IEnumerator Animate(int pos)
@@ -218,15 +215,16 @@ public class OutOfSync : MonoBehaviour
         {
             SquareObjs[pos].GetComponent<MeshRenderer>().material.color = _colors[_animation[pos][_queuePositions[pos]]];
             _queuePositions[pos]++;
-            if (_queuePositions[pos] == 7) _queuePositions[pos] = 0;
-            yield return new WaitForSeconds(_speeds[pos]);
+            if (_queuePositions[pos] == 5) {
+                _queuePositions[pos] = 0;
+                SquareObjs[pos].GetComponent<MeshRenderer>().material.color = _colors[1];
+                yield return new WaitForSeconds(_speeds[pos] / 2f);
+                SquareObjs[pos].GetComponent<MeshRenderer>().material.color = _colors[0];
+                yield return new WaitForSeconds(_speeds[pos] / 2f);
+            }
+            else yield return new WaitForSeconds(_speeds[pos]);
         }
     }
-    private int[] GenerateArray(string word)
-    {
-        return Enumerable.Range(0, 25).Select(i => word.Select(j => _key[j - 'A']).ToArray().SelectMany(j => j).ToArray()[_originalShift[i]]).ToArray();
-    }
-
 #pragma warning disable 0414
     private readonly string TwitchHelpMessage = "!{0} press A1 [Press square at column A, row 1] | Columns go from A-C left to right. Rows go from 1-3 top to bottom";
 #pragma warning restore 0414
